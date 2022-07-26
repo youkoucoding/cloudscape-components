@@ -53,6 +53,8 @@ const tokens: StyleDictionary.SpacingDictionary = {
   spaceTableEmbeddedContentBottom: '0px',
   spaceTableEmbeddedHeaderTop: '0px',
   spaceTableFooterHorizontal: '{spaceTableHeaderHorizontal}',
+  spaceTableSelectionOffset: '{spaceScaledXxs}',
+  spaceTableSortingEdgeRight: '{spaceTableHeaderHorizontal}',
   spaceTableSortingRight: '{spaceScaledS}',
   spaceTabsFocusOutlineGutter: '-8px',
   spaceTextGridVertical: '{spaceScaledM}',

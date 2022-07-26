@@ -493,6 +493,7 @@ export type BordersTokenName =
   | 'borderLineChartWidth'
   | 'borderPanelHeaderWidth'
   | 'borderPanelTopWidth'
+  | 'borderTableHeaderHorizontalWidth'
   | 'borderTableStickyWidth'
   | 'borderLinkFocusRingOutline'
   | 'borderLinkFocusRingShadowSpread';
@@ -595,6 +596,8 @@ export type SpacingTokenName =
   | 'spaceTableHorizontal'
   | 'spaceTableHorizontalEdge'
   | 'spaceTableHorizontalEdgeSelectable'
+  | 'spaceTableSelectionOffset'
+  | 'spaceTableSortingEdgeRight'
   | 'spaceTableSortingRight'
   | 'spaceTabsFocusOutlineGutter'
   | 'spaceTextGridVertical'

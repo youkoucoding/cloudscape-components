@@ -21,7 +21,8 @@
   width: 100%;
   left: 0;
   box-sizing: border-box;
-  border-right: 0.1 * styles.$base-size solid transparent;
+  border-right: awsui.$border-divider-section-width solid transparent;
+  padding-right: awsui.$space-table-selection-offset;
 }
 
 .stud {

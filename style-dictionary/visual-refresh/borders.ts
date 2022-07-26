@@ -33,6 +33,7 @@ export const tokens: StyleDictionary.BordersDictionary = {
   borderLineChartWidth: '2px',
   borderPanelHeaderWidth: '2px',
   borderPanelTopWidth: '1px',
+  borderTableHeaderHorizontalWidth: '{borderFieldWidth}',
   borderTableStickyWidth: '2px',
   borderLinkFocusRingOutline: '0',
   borderLinkFocusRingShadowSpread: '2px',

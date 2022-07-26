@@ -35,7 +35,8 @@
     padding-right: awsui.$space-table-header-horizontal;
   }
   &:last-child.header-cell-sortable {
-    border-right: awsui.$border-field-width solid transparent;
+    border-right: awsui.$border-table-header-horizontal-width solid transparent;
+    padding-right: awsui.$space-table-sorting-edge-right;
   }
 
   &:not(:last-child):before {
