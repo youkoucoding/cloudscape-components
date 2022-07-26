@@ -71,7 +71,8 @@ export default function DataSeries<T extends ChartDataTypes>({
 
           switch (series.type) {
             case 'line':
-            case 'threshold': {
+            case 'threshold':
+            case 'x-threshold': {
               return (
                 <g
                   key={index}

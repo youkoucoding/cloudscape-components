@@ -117,7 +117,7 @@ export default function ChartContainer<T extends ChartDataTypes>({
 
   const isRefresh = useVisualRefresh(containerRefObject);
 
-  const linesOnly = series.every(({ series }) => series.type === 'line' || series.type === 'threshold');
+  const linesOnly = series.every(({ series }) => series.type !== 'bar');
 
   const xDomain = (props.xDomain || computeDomainX(series, xScaleType)) as
     | readonly number[]
@@ -375,13 +375,16 @@ export default function ChartContainer<T extends ChartDataTypes>({
     if (highlightedX === null) {
       return null;
     }
-    // If there is a highlighted point - only use its corresponding series details.
-    for (const series of visibleSeries) {
-      if (series.series === highlightedPoint?.series) {
-        return formatHighlighted(highlightedX, [series], xTickFormatter);
-      }
+
+    // When series point is highlighted show the corresponding series and matching x-thresholds.
+    if (highlightedPoint) {
+      const seriesToShow = visibleSeries.filter(
+        series => series.series === highlightedPoint?.series || series.series.type === 'x-threshold'
+      );
+      return formatHighlighted(highlightedX, seriesToShow, xTickFormatter);
     }
-    // Otherwise - use all series details.
+
+    // Otherwise - show all visible series details.
     return formatHighlighted(highlightedX, visibleSeries, xTickFormatter);
   }, [highlightedX, highlightedPoint, visibleSeries, xTickFormatter]);
 
@@ -468,7 +471,7 @@ export default function ChartContainer<T extends ChartDataTypes>({
               key={verticalLineX || ''}
               height={plotHeight}
               showPoints={highlightedPoint === null}
-              showLine={!isGroupNavigation}
+              showLine={!isGroupNavigation && highlightedPoint?.series.type !== 'x-threshold'}
               points={verticalMarkers}
               ref={verticalMarkerRef}
             />

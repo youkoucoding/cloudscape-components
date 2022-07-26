@@ -13,7 +13,7 @@ export interface HighlightDetails {
 /**
  * Formats provided x-position and its corresponding series values.
  */
-export default function formatPosition<T extends ChartDataTypes>(
+export default function formatHighlighted<T extends ChartDataTypes>(
   position: T,
   series: readonly InternalChartSeries<T>[],
   xTickFormatter?: CartesianChartProps.TickFormatter<T>
@@ -33,6 +33,18 @@ export default function formatPosition<T extends ChartDataTypes>(
 
 function getSeriesDetail<T>(internalSeries: InternalChartSeries<T>, targetX: T): ChartSeriesDetailItem | null {
   const { series, color } = internalSeries;
+
+  // X-thresholds are only shown when X matches.
+  if (series.type === 'x-threshold') {
+    return series.x === targetX
+      ? {
+          key: series.title,
+          value: '',
+          color,
+          markerType: 'dashed',
+        }
+      : null;
+  }
 
   if (series.type === 'threshold') {
     return {

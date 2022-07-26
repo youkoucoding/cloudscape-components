@@ -83,6 +83,11 @@
   stroke-width: awsui.$border-line-chart-width;
 }
 
+.series--x-threshold {
+  stroke-dasharray: awsui.$border-line-chart-dash-array;
+  stroke-width: awsui.$border-line-chart-width;
+}
+
 .bar-group {
   /* used in dom query */
 }

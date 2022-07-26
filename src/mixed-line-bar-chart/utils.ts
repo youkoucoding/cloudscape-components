@@ -8,27 +8,43 @@ export const chartLegendMap: Record<string, ChartSeriesMarkerType> = {
   line: 'line',
   bar: 'rectangle',
   threshold: 'dashed',
+  'x-threshold': 'dashed',
 };
 
 export function computeDomainX<T>(series: readonly InternalChartSeries<T>[], xScaleType: ScaleType) {
   if (xScaleType === 'categorical') {
     return series.reduce((acc, s) => {
-      if (s.series.type !== 'threshold') {
+      if (s.series.type === 'bar' || s.series.type === 'line') {
         s.series.data.forEach(({ x }) => {
           if (acc.indexOf(x) === -1) {
             acc.push(x);
           }
         });
       }
+      if (s.series.type === 'x-threshold') {
+        if (acc.indexOf(s.series.x) === -1) {
+          acc.push(s.series.x);
+        }
+      }
       return acc;
     }, [] as T[]);
   }
 
   return series.reduce((acc, curr) => {
+    // Thresholds don't have X value.
     if (curr.series.type === 'threshold') {
       return acc;
     }
 
+    // Compare x-threshold X with current min, max.
+    if (curr.series.type === 'x-threshold') {
+      const [min, max] = acc;
+      const newMin = min === undefined || curr.series.x < min ? curr.series.x : min;
+      const newMax = max === undefined || max < curr.series.x ? curr.series.x : max;
+      return [newMin, newMax] as T[];
+    }
+
+    // Compare all series X values with current min, max.
     return curr.series.data.reduce(([min, max], { x }) => {
       const newMin = min === undefined || x < min ? x : min;
       const newMax = max === undefined || max < x ? x : max;
@@ -108,14 +124,20 @@ export function computeDomainY<T>(
 
   const domain = _series.reduce(
     (acc, curr) => {
+      // Compare threshold Y value with current min, max.
       if (curr.series.type === 'threshold') {
         const [min, max] = acc;
-        const y = curr.series.y;
-        const newMin = min === undefined || y < min ? y : min;
-        const newMax = max === undefined || max < y ? y : max;
+        const newMin = min === undefined || curr.series.y < min ? curr.series.y : min;
+        const newMax = max === undefined || max < curr.series.y ? curr.series.y : max;
         return [newMin, newMax];
       }
 
+      // X-thresholds don't have Y value.
+      if (curr.series.type === 'x-threshold') {
+        return acc;
+      }
+
+      // Compare all series Y values with current min, max.
       return curr.series.data.reduce(([min, max], { y }) => {
         const newMin = min === undefined || y < min ? y : min;
         const newMax = max === undefined || max < y ? y : max;

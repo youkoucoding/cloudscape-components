@@ -38,9 +38,13 @@ export default function makeScaledBarGroups<T extends ChartDataTypes>(
       x,
       isValid,
       hasData: series.some(({ series }) => {
+        // If there is a threshold series, every valid group will have a data point.
         if (series.type === 'threshold') {
-          // If there is a threshold series, every valid group will have a data point
           return true;
+        }
+        // X-thresholds do not have associated value.
+        if (series.type === 'x-threshold') {
+          return false;
         }
         return (series.data as ReadonlyArray<MixedLineBarChartProps.Datum<T>>).some(datum => matchesX(datum.x, x));
       }),

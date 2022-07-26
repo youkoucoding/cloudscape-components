@@ -148,6 +148,15 @@ export function useNavigation<T extends ChartDataTypes>({
           series: nextSeries,
           datum: scaledSeries[scaledTargetIndex]?.datum,
         });
+      } else if (nextSeries.type === 'x-threshold') {
+        highlightSeries(nextSeries);
+        highlightPoint({
+          x: xScale.d3Scale(nextSeries.x as any) ?? NaN,
+          y: yScale.d3Scale(0) ?? NaN,
+          color: nextInternalSeries.color,
+          series: nextSeries,
+          datum: { x: nextSeries.x, y: 0 },
+        });
       }
     },
     [
@@ -184,17 +193,13 @@ export function useNavigation<T extends ChartDataTypes>({
         highlightSeries(series);
         highlightPoint(nextPointScaled);
       } else if (series.type === 'threshold') {
-        const [scaledThresholdSeries] = scaledSeries.filter(it => it.series === series);
-        const scaledDataSeries = scaledSeries.filter(it => it.datum);
-        const indexOfPreviousPoint = scaledDataSeries.map(it => it.x).indexOf(previousPoint.x);
-        const nextPointIndex = circleIndex(indexOfPreviousPoint + direction, [0, scaledDataSeries.length - 1]);
-        setTargetX(scaledDataSeries[nextPointIndex].datum?.x || null);
+        const scaledThresholdSeries = scaledSeries.filter(it => it.series === series);
+        const indexOfPreviousPoint = scaledThresholdSeries.map(it => it.x).indexOf(previousPoint.x);
+        const nextPointIndex = circleIndex(indexOfPreviousPoint + direction, [0, scaledThresholdSeries.length - 1]);
+
+        setTargetX(scaledThresholdSeries[nextPointIndex].datum?.x || null);
         highlightSeries(series);
-        highlightPoint({
-          ...scaledThresholdSeries,
-          datum: scaledDataSeries[nextPointIndex].datum,
-          x: scaledDataSeries[nextPointIndex].x,
-        });
+        highlightPoint(scaledThresholdSeries[nextPointIndex]);
       } else if (series.type === 'bar') {
         const xDomain = xScale.domain as T[];
         const MAX_GROUP_INDEX = xDomain.length - 1;

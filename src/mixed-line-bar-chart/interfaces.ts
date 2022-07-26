@@ -53,7 +53,7 @@ export namespace MixedLineBarChartProps {
   }
 
   interface IDataSeries<T> {
-    type: 'line' | 'bar' | 'threshold';
+    type: 'line' | 'bar' | 'threshold' | 'x-threshold';
     title: string;
     color?: string;
 
@@ -79,9 +79,14 @@ export namespace MixedLineBarChartProps {
     valueFormatter?: CartesianChartProps.TickFormatter<number>;
   }
 
+  export interface XThresholdSeries<T> extends Omit<IDataSeries<T>, 'data' | 'valueFormatter'> {
+    type: 'x-threshold';
+    x: T;
+  }
+
   export type DataSeries<T> = LineDataSeries<T> | BarDataSeries<T>;
 
-  export type ChartSeries<T> = DataSeries<T> | ThresholdSeries;
+  export type ChartSeries<T> = DataSeries<T> | ThresholdSeries | XThresholdSeries<T>;
 
   export type FilterChangeDetail<T> = CartesianChartProps.FilterChangeDetail<ChartSeries<T>>;
 

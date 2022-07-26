@@ -97,17 +97,15 @@ export default function InternalMixedLineBarChart<T extends number | string | Da
   }, [xScaleType, horizontalBars, externalSeries]);
 
   const series = useMemo(() => {
+    // Generate series colors if not explicitly provided.
+    // The thresholds use a dedicated colour scale.
     const colors = createCategoryColorScale(
       externalSeries,
-      it => it.type === 'threshold',
+      it => it.type === 'threshold' || it.type === 'x-threshold',
       it => it.color || null
     );
 
-    return externalSeries.map((s, i) => ({
-      index: i,
-      color: colors[i],
-      series: s,
-    }));
+    return externalSeries.map((s, i) => ({ index: i, color: colors[i], series: s }));
   }, [externalSeries]);
 
   const [highlightedPoint, setHighlightedPoint] = useState<ScaledPoint<T> | null>(null);

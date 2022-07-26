@@ -52,15 +52,17 @@ describe('makeScaledSeries', () => {
   it('scales mixed line/threshold series', () => {
     const scaled = makeScaledSeries(createInternalSeries([lineSeries1, thresholdSeries]), xScaleLinear, yScaleLinear);
 
+    console.log('scaled', scaled);
+
     expect(scaled).toEqual([
       { color: '', datum: { x: 0, y: 10 }, series: lineSeries1, x: 0, y: 10 },
+      { color: '', datum: { x: 0, y: 8 }, series: thresholdSeries, x: 0, y: 8 },
       { color: '', datum: { x: 1, y: 8 }, series: lineSeries1, x: 1, y: 8 },
+      { color: '', datum: { x: 1, y: 8 }, series: thresholdSeries, x: 1, y: 8 },
       { color: '', datum: { x: 2, y: 12 }, series: lineSeries1, x: 2, y: 12 },
+      { color: '', datum: { x: 2, y: 8 }, series: thresholdSeries, x: 2, y: 8 },
       { color: '', datum: { x: 3, y: 10 }, series: lineSeries1, x: 3, y: 10 },
-      { color: '', series: thresholdSeries, x: 0, y: 8 },
-      { color: '', series: thresholdSeries, x: 1, y: 8 },
-      { color: '', series: thresholdSeries, x: 2, y: 8 },
-      { color: '', series: thresholdSeries, x: 3, y: 8 },
+      { color: '', datum: { x: 3, y: 8 }, series: thresholdSeries, x: 3, y: 8 },
     ]);
   });
 });

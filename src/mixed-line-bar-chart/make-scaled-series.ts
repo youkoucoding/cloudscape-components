@@ -22,40 +22,66 @@ export default function makeScaledSeries<T extends ChartDataTypes>(
   const xOffset = xScale.isCategorical() ? Math.max(0, xScale.d3Scale.bandwidth() - 1) / 2 : 0;
   const scaleX = (x: T) => (xScale.d3Scale(x as any) || 0) + xOffset;
   const scaleY = (y: number) => yScale.d3Scale(y) || 0;
-  const allScaledX = getAllScaledX(series, scaleX);
+  const allX = getAllX(series);
 
-  // Support threshold-only setup.
-  if (allScaledX.length === 0) {
-    allScaledX.push(NaN);
-  }
-
-  return series.reduce((acc, { series, color }) => {
+  const scaledSeries = series.reduce((acc, { series, color }) => {
+    // Scale and add all line series data points.
     if (series.type === 'line') {
       for (const datum of series.data as MixedLineBarChartProps.Datum<T>[]) {
         acc.push({ x: scaleX(datum.x), y: scaleY(datum.y), datum, series, color });
       }
-    } else if (series.type === 'threshold') {
-      for (const x of allScaledX) {
-        acc.push({ x, y: scaleY(series.y), series, color });
+    }
+    // Thresholds don't have X. To make thresholds navigable they are mapped to all defined X values.
+    else if (series.type === 'threshold') {
+      for (const x of allX) {
+        acc.push({ x: scaleX(x), y: scaleY(series.y), datum: { x, y: series.y }, series, color });
       }
+      // Support threshold-only setup.
+      if (allX.length === 0) {
+        acc.push({ x: NaN, y: scaleY(series.y), series, color });
+      }
+    }
+    // X-thresholds only have X. The Y is taken as 0 so that the hoverable point is rendered on the baseline.
+    else if (series.type === 'x-threshold') {
+      acc.push({ x: scaleX(series.x), y: scaleY(0), datum: { x: series.x, y: 0 }, series, color });
+    }
+    // Bar series are handled separately.
+    else if (series.type === 'bar') {
+      // noop
     }
     return acc;
   }, [] as ScaledPoint<T>[]);
+
+  // Sort scaled points by x to ensure their order matches visual order in the chart to support navigation.
+  scaledSeries.sort((s1, s2) => s1.x - s2.x);
+
+  return scaledSeries;
 }
 
 /**
  * Collect unique x values from all data series.
  */
-function getAllScaledX<T>(series: ReadonlyArray<InternalChartSeries<T>>, scaleX: (x: T) => number) {
-  const addDataXSet = new Set<number>();
+function getAllX<T>(series: ReadonlyArray<InternalChartSeries<T>>) {
+  const addDataXSet = new Set<T>();
   for (const { series: s } of series) {
-    if (s.type !== 'threshold') {
-      for (const d of s.data) {
-        addDataXSet.add(scaleX(d.x));
-      }
+    switch (s.type) {
+      // Add all X values from data series.
+      case 'bar':
+      case 'line':
+        for (const d of s.data) {
+          addDataXSet.add(d.x);
+        }
+        break;
+      // X-thresholds have a single X value.
+      case 'x-threshold':
+        addDataXSet.add(s.x);
+        break;
+      // Thresholds don't have X values.
+      case 'threshold':
+        break;
     }
   }
-  const allDataX: number[] = [];
+  const allDataX: T[] = [];
   addDataXSet.forEach(x => allDataX.push(x));
 
   return allDataX;
