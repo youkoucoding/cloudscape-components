@@ -5,7 +5,7 @@ import React, { Ref, useCallback, useRef, useState } from 'react';
 import { getWeekStartByLocale } from 'weekstart';
 import styles from './styles.css.js';
 import { DatePickerProps } from './interfaces';
-import Calendar, { DayIndex } from './calendar';
+import { DayIndex } from './calendar';
 import { normalizeLocale } from './calendar/utils/locales';
 import { getDateLabel } from './calendar/utils/intl';
 import { CalendarTypes } from './calendar/definitions';
@@ -27,6 +27,7 @@ import useBaseComponent from '../internal/hooks/use-base-component';
 import { useUniqueId } from '../internal/hooks/use-unique-id';
 import { useMergeRefs } from '../internal/hooks/use-merge-refs';
 import TabTrap from '../internal/components/tab-trap';
+import DatePickerEmbedded from './embedded';
 
 export { DatePickerProps };
 
@@ -56,7 +57,6 @@ const DatePicker = React.forwardRef(
       invalid,
       openCalendarAriaLabel,
       expandToViewport,
-      variant,
       ...rest
     }: DatePickerProps,
     ref: Ref<DatePickerProps.Ref>
@@ -219,65 +219,44 @@ const DatePicker = React.forwardRef(
       event.preventDefault();
     };
 
-    if (variant === 'embedded') {
-      return (
-        <Calendar
-          ref={calendarRef}
-          selectedDate={memoizedDate('value', selectedDate)}
-          focusedDate={memoizedDate('focused', focusedDate)}
-          displayedDate={memoizedDate('displayed', displayedDate)}
-          locale={normalizedLocale}
-          startOfWeek={normalizedStartOfWeek}
-          isDateEnabled={isDateEnabled ? isDateEnabled : () => true}
-          calendarHasFocus={calendarHasFocus}
-          nextMonthLabel={nextMonthAriaLabel}
-          previousMonthLabel={previousMonthAriaLabel}
-          todayAriaLabel={todayAriaLabel}
-          onChangeMonth={onChangeMonthHandler}
-          onSelectDate={onSelectDateHandler}
-          onFocusDate={onDateFocusHandler}
-        />
-      );
-    } else {
-      return (
-        <div {...baseProps} ref={mergedRef} onKeyDown={onWrapperKeyDownHandler}>
-          <Dropdown
-            stretchWidth={true}
-            stretchHeight={true}
-            open={isDropDownOpen}
-            onDropdownClose={onDropdownCloseHandler}
-            onMouseDown={handleMouseDown}
-            trigger={DateInputElement}
-            expandToViewport={expandToViewport}
-            scrollable={false}
-            dropdownId={dropdownId}
-          >
-            {isDropDownOpen && (
-              <>
-                {calendarHasFocus && <TabTrap focusNextCallback={focusCurrentDate} />}
-                <Calendar
-                  ref={calendarRef}
-                  selectedDate={memoizedDate('value', selectedDate)}
-                  focusedDate={memoizedDate('focused', focusedDate)}
-                  displayedDate={memoizedDate('displayed', displayedDate)}
-                  locale={normalizedLocale}
-                  startOfWeek={normalizedStartOfWeek}
-                  isDateEnabled={isDateEnabled ? isDateEnabled : () => true}
-                  calendarHasFocus={calendarHasFocus}
-                  nextMonthLabel={nextMonthAriaLabel}
-                  previousMonthLabel={previousMonthAriaLabel}
-                  todayAriaLabel={todayAriaLabel}
-                  onChangeMonth={onChangeMonthHandler}
-                  onSelectDate={onSelectDateHandler}
-                  onFocusDate={onDateFocusHandler}
-                />
-                {calendarHasFocus && <TabTrap focusNextCallback={() => calendarRef.current?.focus()} />}
-              </>
-            )}
-          </Dropdown>
-        </div>
-      );
-    }
+    return (
+      <div {...baseProps} ref={mergedRef} onKeyDown={onWrapperKeyDownHandler}>
+        <Dropdown
+          stretchWidth={true}
+          stretchHeight={true}
+          open={isDropDownOpen}
+          onDropdownClose={onDropdownCloseHandler}
+          onMouseDown={handleMouseDown}
+          trigger={DateInputElement}
+          expandToViewport={expandToViewport}
+          scrollable={false}
+          dropdownId={dropdownId}
+        >
+          {isDropDownOpen && (
+            <>
+              {calendarHasFocus && <TabTrap focusNextCallback={focusCurrentDate} />}
+              {DatePickerEmbedded(
+                calendarRef,
+                selectedDate,
+                focusedDate,
+                displayedDate,
+                normalizedLocale,
+                normalizedStartOfWeek,
+                isDateEnabled,
+                calendarHasFocus,
+                nextMonthAriaLabel,
+                previousMonthAriaLabel,
+                todayAriaLabel,
+                onChangeMonthHandler,
+                onSelectDateHandler,
+                onDateFocusHandler
+              )}
+              {calendarHasFocus && <TabTrap focusNextCallback={() => calendarRef.current?.focus()} />}
+            </>
+          )}
+        </Dropdown>
+      </div>
+    );
   }
 );
 
