@@ -9,10 +9,12 @@ import useFocusVisible from '../../internal/hooks/focus-visible/index.js';
 import { DatePickerProps } from '../interfaces';
 import { CalendarTypes } from './definitions';
 import CalendarHeader from './header';
-import Grid, { DateChangeHandlerNullable } from './grid';
+import Grid from './grid';
 import moveFocusHandler from './utils/move-focus-handler';
 import { useUniqueId } from '../../internal/hooks/use-unique-id/index.js';
 import { useMergeRefs } from '../../internal/hooks/use-merge-refs/index.js';
+import { getWeekStartByLocale } from 'weekstart';
+import { formatDate, memoizedDate } from './utils/date';
 
 export interface DateChangeHandler {
   (detail: CalendarTypes.DateDetail): void;
@@ -30,19 +32,16 @@ interface HeaderChangeMonthHandler {
 
 interface CalendarProps extends BaseComponentProps {
   locale: string;
-  startOfWeek: DayIndex;
+  startOfWeek: number | undefined;
   selectedDate: Date | null;
   displayedDate: Date;
-  focusedDate?: Date | null;
   isDateEnabled: DatePickerProps.IsDateEnabledFunction;
-  calendarHasFocus: boolean;
   nextMonthLabel: string;
   previousMonthLabel: string;
   todayAriaLabel: string;
 
   onChangeMonth: MonthChangeHandler;
   onSelectDate: DateChangeHandler;
-  onFocusDate: DateChangeHandlerNullable;
 }
 
 const Calendar = React.forwardRef(
@@ -51,19 +50,29 @@ const Calendar = React.forwardRef(
       locale,
       startOfWeek,
       displayedDate,
-      focusedDate = null,
       todayAriaLabel,
-      calendarHasFocus,
       selectedDate,
       isDateEnabled,
       onChangeMonth,
       onSelectDate,
-      onFocusDate,
       previousMonthLabel,
       nextMonthLabel,
     }: CalendarProps,
     ref
   ) => {
+    const normalizedStartOfWeek = (
+      typeof startOfWeek === 'number' ? startOfWeek : getWeekStartByLocale(locale)
+    ) as DayIndex;
+
+    const [focusedDate, setFocusedDate] = useState<Date | null>(null);
+
+    const onDateFocusHandler = ({ date }: CalendarTypes.DateDetailNullable) => {
+      if (date) {
+        const value = formatDate(date);
+        setFocusedDate(memoizedDate('focused', value));
+      }
+    };
+
     const focusVisible = useFocusVisible();
     const headerId = useUniqueId('calendar-dialog-title-');
     const elementRef = useRef<HTMLDivElement>(null);
@@ -98,8 +107,10 @@ const Calendar = React.forwardRef(
     const focusCurrentDate: FocusNextElement = () =>
       (elementRef.current?.querySelector(`.${styles['calendar-day-focusable']}`) as HTMLDivElement)?.focus();
 
-    const onHeaderChangeMonthHandler: HeaderChangeMonthHandler = isPrevious =>
+    const onHeaderChangeMonthHandler: HeaderChangeMonthHandler = isPrevious => {
+      setFocusedDate(null);
       onChangeMonth(addMonths(baseDate, isPrevious ? -1 : 1));
+    };
 
     useEffect(() => {
       // focus current date if the focus is already inside the calendar grid
@@ -109,18 +120,20 @@ const Calendar = React.forwardRef(
     }, [baseDate, focusedDate, gridHasFocus]);
 
     useEffect(() => {
-      const calendarShouldHaveFocus = calendarHasFocus;
       const calendarActuallyHasFocus = elementRef.current?.contains(document.activeElement);
 
-      if (calendarShouldHaveFocus && !calendarActuallyHasFocus) {
+      if (!calendarActuallyHasFocus) {
         elementRef.current?.focus();
       }
 
       // When the baseDate or isDateEnabled changes, there might not be a focusable date in the grid anymore
-    }, [calendarHasFocus, baseDate, isDateEnabled]);
+    }, [baseDate, isDateEnabled]);
 
-    if (calendarHasFocus && !focusedDate) {
-      focusedDate = selectFocusedDate(selectedDate, baseDate);
+    if (!focusedDate) {
+      const nextFocusedDate = selectFocusedDate(selectedDate, baseDate);
+      if (nextFocusedDate) {
+        setFocusedDate(nextFocusedDate);
+      }
     }
 
     const onGridBlur = (event: React.FocusEvent) => {
@@ -154,7 +167,6 @@ const Calendar = React.forwardRef(
             onChangeMonth={onHeaderChangeMonthHandler}
             previousMonthLabel={previousMonthLabel}
             nextMonthLabel={nextMonthLabel}
-            calendarHasFocus={calendarHasFocus}
           />
           <div onBlur={onGridBlur} onFocus={onGridFocus} ref={gridWrapperRef}>
             <Grid
@@ -162,10 +174,15 @@ const Calendar = React.forwardRef(
               baseDate={baseDate}
               isDateEnabled={isDateEnabled}
               focusedDate={focusedDate}
-              onSelectDate={onSelectDate}
-              onFocusDate={onFocusDate}
-              onChangeMonth={onChangeMonth}
-              startOfWeek={startOfWeek}
+              onSelectDate={e => {
+                onSelectDate(e);
+                setFocusedDate(null);
+              }}
+              onFocusDate={onDateFocusHandler}
+              onChangeMonth={e => {
+                onChangeMonth(e);
+              }}
+              startOfWeek={normalizedStartOfWeek}
               todayAriaLabel={todayAriaLabel}
               selectedDate={selectedDate}
               handleFocusMove={moveFocusHandler}
