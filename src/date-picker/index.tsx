@@ -27,7 +27,7 @@ import useBaseComponent from '../internal/hooks/use-base-component';
 import { useUniqueId } from '../internal/hooks/use-unique-id';
 import { useMergeRefs } from '../internal/hooks/use-merge-refs';
 import TabTrap from '../internal/components/tab-trap';
-import DatePickerEmbedded from './embedded';
+import { DatePickerEmbedded } from './embedded';
 
 export { DatePickerProps };
 
@@ -235,22 +235,22 @@ const DatePicker = React.forwardRef(
           {isDropDownOpen && (
             <>
               {calendarHasFocus && <TabTrap focusNextCallback={focusCurrentDate} />}
-              {DatePickerEmbedded(
-                calendarRef,
-                selectedDate,
-                focusedDate,
-                displayedDate,
-                normalizedLocale,
-                normalizedStartOfWeek,
-                isDateEnabled,
-                calendarHasFocus,
-                nextMonthAriaLabel,
-                previousMonthAriaLabel,
-                todayAriaLabel,
-                onChangeMonthHandler,
-                onSelectDateHandler,
-                onDateFocusHandler
-              )}
+              <DatePickerEmbedded
+                calendarRef={calendarRef}
+                selectedDate={selectedDate}
+                focusedDate={focusedDate}
+                displayedDate={displayedDate}
+                normalizedLocale={normalizedLocale}
+                normalizedStartOfWeek={normalizedStartOfWeek}
+                isDateEnabled={isDateEnabled}
+                calendarHasFocus={calendarHasFocus}
+                nextMonthAriaLabel={nextMonthAriaLabel}
+                previousMonthAriaLabel={previousMonthAriaLabel}
+                todayAriaLabel={todayAriaLabel}
+                onChangeMonthHandler={onChangeMonthHandler}
+                onSelectDateHandler={onSelectDateHandler}
+                onDateFocusHandler={onDateFocusHandler}
+              />
               {calendarHasFocus && <TabTrap focusNextCallback={() => calendarRef.current?.focus()} />}
             </>
           )}
