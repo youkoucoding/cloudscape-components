@@ -22,9 +22,12 @@ export default function ContentLayout({ children, disableOverlap, header, ...res
   const mergedRef = useMergeRefs(rootElement, __internalRootRef);
   const isVisualRefresh = useVisualRefresh(rootElement);
 
-  const isOverlapDisabled = !children || !header || disableOverlap;
-
-  // Documentation to be added.
+  /**
+   * Observe the height of the ContentLayout background element. This value will be used to
+   * setthe dynamicOverlapHeight property in the AppLayout which will extend the overlap
+   * height of the AppLayout down to include this element. This creates the appearance
+   * of a seamless dark background when these two components are used together.
+   */
   const [overlapContainerQuery, overlapElement] = useContainerQuery(rect => rect.height);
 
   useLayoutEffect(
@@ -35,6 +38,13 @@ export default function ContentLayout({ children, disableOverlap, header, ...res
     },
     [isVisualRefresh, overlapContainerQuery, setDynamicOverlapHeight]
   );
+
+  /**
+   * Disable the overlap if the component is missing either a header or child
+   * content. If the component is not using visual refresh then the overlap
+   * will not displayed at all. This is handled in the CSS not the JavaScript.
+   */
+  const isOverlapDisabled = !children || !header || disableOverlap;
 
   return (
     <div
