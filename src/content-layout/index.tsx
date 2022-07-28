@@ -17,10 +17,11 @@ export { ContentLayoutProps };
 export default function ContentLayout({ children, disableOverlap, header, ...rest }: ContentLayoutProps) {
   const baseProps = getBaseProps(rest);
   const { breadcrumbs, setDynamicOverlapHeight } = useContext(AppLayoutContext);
+  const isVisualRefresh = useVisualRefresh();
+
   const rootElement = useRef<HTMLDivElement>(null);
   const { __internalRootRef } = useBaseComponent('ContentLayout');
   const mergedRef = useMergeRefs(rootElement, __internalRootRef);
-  const isVisualRefresh = useVisualRefresh(rootElement);
 
   /**
    * Observe the height of the ContentLayout background element. This value will be used to
