@@ -25,7 +25,7 @@ export default function ContentLayout({ children, disableOverlap, header, ...res
 
   /**
    * Observe the height of the ContentLayout background element. This value will be used to
-   * setthe dynamicOverlapHeight property in the AppLayout which will extend the overlap
+   * set the dynamicOverlapHeight property in the AppLayout which will extend the overlap
    * height of the AppLayout down to include this element. This creates the appearance
    * of a seamless dark background when these two components are used together.
    */
@@ -43,7 +43,7 @@ export default function ContentLayout({ children, disableOverlap, header, ...res
   /**
    * Disable the overlap if the component is missing either a header or child
    * content. If the component is not using visual refresh then the overlap
-   * will not displayed at all. This is handled in the CSS not the JavaScript.
+   * will not be displayed at all. This is handled in the CSS not the JavaScript.
    */
   const isOverlapDisabled = !children || !header || disableOverlap;
 
