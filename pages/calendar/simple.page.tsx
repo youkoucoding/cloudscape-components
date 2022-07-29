@@ -23,7 +23,6 @@ export default function CalendarPage() {
           locale="en-EN"
           startOfWeek={1}
           isDateEnabled={date => date.getDay() !== 6 && date.getDay() !== 0}
-          calendarHasFocus={true}
           nextMonthLabel="Next month"
           previousMonthLabel="Previous month"
           todayAriaLabel="Today"
@@ -38,7 +37,6 @@ export default function CalendarPage() {
           locale="en-EN"
           startOfWeek={1}
           isDateEnabled={date => date.getDay() !== 6 && date.getDay() !== 0}
-          calendarHasFocus={false}
           nextMonthLabel="Next month"
           previousMonthLabel="Previous month"
           todayAriaLabel="Today"

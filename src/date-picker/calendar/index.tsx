@@ -35,7 +35,6 @@ interface CalendarProps extends BaseComponentProps {
   displayedDate: Date;
   focusedDate?: Date | null;
   isDateEnabled: DatePickerProps.IsDateEnabledFunction;
-  calendarHasFocus: boolean;
   nextMonthLabel: string;
   previousMonthLabel: string;
   todayAriaLabel: string;
@@ -53,7 +52,6 @@ const Calendar = React.forwardRef(
       displayedDate,
       focusedDate = null,
       todayAriaLabel,
-      calendarHasFocus,
       selectedDate,
       isDateEnabled,
       onChangeMonth,
@@ -109,17 +107,16 @@ const Calendar = React.forwardRef(
     }, [baseDate, focusedDate, gridHasFocus]);
 
     useEffect(() => {
-      const calendarShouldHaveFocus = calendarHasFocus;
-      const calendarActuallyHasFocus = elementRef.current?.contains(document.activeElement);
+      const calendarHasFocus = elementRef.current?.contains(document.activeElement);
 
-      if (calendarShouldHaveFocus && !calendarActuallyHasFocus) {
+      if (!calendarHasFocus) {
         elementRef.current?.focus();
       }
 
       // When the baseDate or isDateEnabled changes, there might not be a focusable date in the grid anymore
-    }, [calendarHasFocus, baseDate, isDateEnabled]);
+    }, [baseDate, isDateEnabled]);
 
-    if (calendarHasFocus && !focusedDate) {
+    if (!focusedDate) {
       focusedDate = selectFocusedDate(selectedDate, baseDate);
     }
 
@@ -154,7 +151,6 @@ const Calendar = React.forwardRef(
             onChangeMonth={onHeaderChangeMonthHandler}
             previousMonthLabel={previousMonthLabel}
             nextMonthLabel={nextMonthLabel}
-            calendarHasFocus={calendarHasFocus}
           />
           <div onBlur={onGridBlur} onFocus={onGridFocus} ref={gridWrapperRef}>
             <Grid

@@ -64,7 +64,6 @@ const DatePicker = React.forwardRef(
 
     const baseProps = getBaseProps(rest);
     const [isDropDownOpen, setIsDropDownOpen] = useState<boolean>(false);
-    const [calendarHasFocus, setCalendarHasFocus] = useState<boolean>(false);
     const normalizedLocale = normalizeLocale('DatePicker', locale ?? '');
     const normalizedStartOfWeek = (
       typeof startOfWeek === 'number' ? startOfWeek : getWeekStartByLocale(normalizedLocale)
@@ -99,7 +98,6 @@ const DatePicker = React.forwardRef(
       setIsDropDownOpen(false);
       setSelectedDate(formattedDate);
       setDisplayedDate(formattedDate);
-      setCalendarHasFocus(false);
       setFocusedDate(null);
       fireNonCancelableEvent(onChange, { value: formattedDate });
     };
@@ -113,14 +111,12 @@ const DatePicker = React.forwardRef(
 
     const onDropdownCloseHandler = useCallback(() => {
       setDisplayedDate(defaultDisplayedDate);
-      setCalendarHasFocus(false);
       setIsDropDownOpen(false);
     }, [defaultDisplayedDate]);
 
     const onButtonClickHandler = () => {
       if (!isDropDownOpen) {
         setIsDropDownOpen(true);
-        setCalendarHasFocus(true);
       }
     };
 
@@ -137,7 +133,7 @@ const DatePicker = React.forwardRef(
     };
 
     const onInputBlurHandler: InputProps['onBlur'] = () => {
-      if (!calendarHasFocus) {
+      if (!isDropDownOpen) {
         setDisplayedDate(defaultDisplayedDate);
         setIsDropDownOpen(false);
       }
@@ -176,7 +172,7 @@ const DatePicker = React.forwardRef(
             value={isoToDisplay(value)}
             autoComplete={false}
             disableBrowserAutocorrect={true}
-            disableAutocompleteOnBlur={calendarHasFocus}
+            disableAutocompleteOnBlur={isDropDownOpen}
             disabled={disabled}
             readOnly={readOnly}
             onChange={onInputChangeHandler}
@@ -233,7 +229,7 @@ const DatePicker = React.forwardRef(
         >
           {isDropDownOpen && (
             <>
-              {calendarHasFocus && <TabTrap focusNextCallback={focusCurrentDate} />}
+              <TabTrap focusNextCallback={focusCurrentDate} />
               <Calendar
                 ref={calendarRef}
                 selectedDate={memoizedDate('value', selectedDate)}
@@ -242,7 +238,6 @@ const DatePicker = React.forwardRef(
                 locale={normalizedLocale}
                 startOfWeek={normalizedStartOfWeek}
                 isDateEnabled={isDateEnabled ? isDateEnabled : () => true}
-                calendarHasFocus={calendarHasFocus}
                 nextMonthLabel={nextMonthAriaLabel}
                 previousMonthLabel={previousMonthAriaLabel}
                 todayAriaLabel={todayAriaLabel}
@@ -250,7 +245,7 @@ const DatePicker = React.forwardRef(
                 onSelectDate={onSelectDateHandler}
                 onFocusDate={onDateFocusHandler}
               />
-              {calendarHasFocus && <TabTrap focusNextCallback={() => calendarRef.current?.focus()} />}
+              <TabTrap focusNextCallback={() => calendarRef.current?.focus()} />
             </>
           )}
         </Dropdown>
