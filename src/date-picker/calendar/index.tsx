@@ -3,7 +3,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { addDays, addMonths, isSameMonth, startOfMonth } from 'date-fns';
 import styles from '../styles.css.js';
-import { FocusNextElement } from '../../internal/components/tab-trap';
 import { BaseComponentProps } from '../../internal/base-component';
 import useFocusVisible from '../../internal/hooks/focus-visible/index.js';
 import { DatePickerProps } from '../interfaces';
@@ -103,20 +102,10 @@ const Calendar = React.forwardRef(
 
     const baseDate: Date = getBaseDate(displayedDate);
 
-    const focusCurrentDate: FocusNextElement = () =>
-      (elementRef.current?.querySelector(`.${styles['calendar-day-focusable']}`) as HTMLDivElement)?.focus();
-
     const onHeaderChangeMonthHandler: HeaderChangeMonthHandler = isPrevious => {
       setFocusedDate(null);
       onChangeMonth(addMonths(baseDate, isPrevious ? -1 : 1));
     };
-
-    useEffect(() => {
-      // focus current date if the focus is already inside the calendar grid
-      if (focusedDate instanceof Date && isSameMonth(focusedDate, baseDate)) {
-        focusCurrentDate();
-      }
-    }, [baseDate, focusedDate]);
 
     useEffect(() => {
       const calendarActuallyHasFocus = elementRef.current?.contains(document.activeElement);
