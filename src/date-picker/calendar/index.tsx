@@ -3,6 +3,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { addDays, addMonths, isSameMonth, startOfMonth } from 'date-fns';
 import styles from '../styles.css.js';
+import { FocusNextElement } from '../../internal/components/tab-trap';
 import { BaseComponentProps } from '../../internal/base-component';
 import useFocusVisible from '../../internal/hooks/focus-visible/index.js';
 import { DatePickerProps } from '../interfaces';
@@ -77,6 +78,7 @@ const Calendar = React.forwardRef(
     const elementRef = useRef<HTMLDivElement>(null);
     const calendarRef = useMergeRefs(elementRef, ref);
     const gridWrapperRef = useRef<HTMLDivElement>(null);
+    const [gridHasFocus, setGridHasFocus] = useState(false);
 
     const selectFocusedDate = (selected: Date | null, baseDate: Date): Date | null => {
       if (selected && isDateEnabled(selected) && isSameMonth(selected, baseDate)) {
@@ -102,10 +104,20 @@ const Calendar = React.forwardRef(
 
     const baseDate: Date = getBaseDate(displayedDate);
 
+    const focusCurrentDate: FocusNextElement = () =>
+      (elementRef.current?.querySelector(`.${styles['calendar-day-focusable']}`) as HTMLDivElement)?.focus();
+
     const onHeaderChangeMonthHandler: HeaderChangeMonthHandler = isPrevious => {
       setFocusedDate(null);
       onChangeMonth(addMonths(baseDate, isPrevious ? -1 : 1));
     };
+
+    useEffect(() => {
+      // focus current date if the focus is already inside the calendar grid
+      if (focusedDate instanceof Date && isSameMonth(focusedDate, baseDate) && gridHasFocus) {
+        focusCurrentDate();
+      }
+    }, [baseDate, focusedDate, gridHasFocus]);
 
     useEffect(() => {
       const calendarActuallyHasFocus = elementRef.current?.contains(document.activeElement);
@@ -123,6 +135,12 @@ const Calendar = React.forwardRef(
         setFocusedDate(nextFocusedDate);
       }
     }
+
+    const onGridFocus = () => {
+      if (!gridHasFocus) {
+        setGridHasFocus(true);
+      }
+    };
 
     return (
       <div
@@ -142,7 +160,7 @@ const Calendar = React.forwardRef(
             previousMonthLabel={previousMonthLabel}
             nextMonthLabel={nextMonthLabel}
           />
-          <div ref={gridWrapperRef}>
+          <div onFocus={onGridFocus} ref={gridWrapperRef}>
             <Grid
               locale={locale}
               baseDate={baseDate}
